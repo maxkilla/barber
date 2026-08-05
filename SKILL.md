@@ -1,6 +1,6 @@
 ---
 name: barber
-description: Comb, trim, and optimize other skills. Audits any SKILL.md (or .skill package) for bloat, weak trigger descriptions, redundancy, token waste, and structural problems, then produces a leaner repackaged version. Use whenever the user wants to review, audit, clean up, shorten, optimize, refactor, or "comb" a skill, asks "why isn't my skill triggering", asks which of their skills overlap, or wants their whole skill library tuned up. Works on user skills, downloaded ecosystem skills, and skills just created in this conversation.
+description: Comb, trim, and optimize other skills. Audits any SKILL.md (or .skill package) for bloat, weak trigger descriptions, redundancy, token waste, and structural problems, then produces a leaner repackaged version. Use whenever the user wants to review, audit, clean up, shorten, optimize, or refactor a skill, asks "why isn't my skill triggering", asks which of their skills overlap, or wants their whole skill library tuned up. Works on user skills, downloaded ecosystem skills, and skills just created in this conversation.
 ---
 
 # Barber
@@ -19,13 +19,14 @@ Skills are always-on context tax: every skill's name + description sits in the w
 - Does each section need to exist? Instructions restating what Claude already does by default = delete.
 - Repetition? Same rule stated twice = once.
 - Explaining instead of instructing? Skills are procedure, not essay. "Do X" beats a paragraph on why X matters — keep at most one line of why for genuinely surprising rules.
-- Over 500 lines? Split into references/ files with clear pointers ("read references/foo.md when doing X"). Body should hold the workflow, not the encyclopedia.
+- Over 500 lines (body prose only, frontmatter excluded)? Split into references/ files with clear pointers ("read references/foo.md when doing X"). Body should hold the workflow, not the encyclopedia.
 - Examples: keep only ones that change behavior. Illustrative examples of the obvious = delete.
 
 **3. Structure**
 - Scripts doing deterministic work that instructions ask Claude to do freehand? Move to scripts/ — code executes without loading into context.
 - Assets/templates inline in the body? Move to assets/.
 - Hardcoded values that will rot (dates, versions, IDs)? Flag, and parameterize or instruct-to-fetch-fresh instead.
+- References/*.md pointers in the body — do they resolve to actual files in the skill directory? Dangling references waste a lookup per missed pointer.
 
 **4. Dependency hygiene (Claude Code / any skill with installs)**
 - Unconditional install commands ("pip install ...", "npm install ...") that run every session? Flag. Replace with check-then-install:
@@ -52,6 +53,15 @@ Per Bennett 2023 ("weakest hypothesis, not shortest"): a good trigger descriptio
 - Missing co-load links: skill A's workflow depends on or commonly runs alongside skill B (e.g. a design-to-code skill that needs a framework-specific skill), but neither description says so. Flag as a silent-failure risk — Claude won't know to load both.
 - False co-load: description says "use alongside X" but X's own scope never actually needs it, or X was renamed/removed. Flag as stale.
 - Skip this section if only one skill is in scope — dedup needs a second skill to compare against.
+
+## Thresholds and modes
+
+**Default audit line count:** 500 lines of body prose (YAML frontmatter excluded). A skill under the threshold with no structural/dependency/safety findings = "clean, no cuts." If `--max-lines N` is passed, substitute N for the default threshold — skills at or below N are skipped automatically without a deep read, the first rung that holds.
+
+**Modes:**
+- Full audit (default): reads the entire SKILL.md + references/ + scripts/ + assets/, reports every finding, proposes edits to /tmp/<name>/.
+- `--check-only`: reports findings only — no /tmp copy, no edits, no file writes. One line per finding. For quick "should I invest in trimming this?" decisions.
+- `--max-lines N`: auto-skip skills whose body prose is ≤ N lines without reading further. Skips the deep audit, reports "under threshold, clean, no cuts" immediately.
 
 ## Repair workflow
 
