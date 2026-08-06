@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-[Install](#install) · [What it does](#what-it-does) · [Usage](#usage) · [When to use / when to skip](#when-to-use--when-to-skip) · [License](#license)
+[Install](#install) · [Hermes compatibility](#hermes-compatibility) · [What it does](#what-it-does) · [How it works](#how-it-works) · [Usage](#usage) · [Proof](#proof) · [When to use / when to skip](#when-to-use--when-to-skip) · [License](#license)
 
 ---
 
@@ -14,7 +14,6 @@ Skills are always-on context tax: every skill's name + description sits in the m
 
 Copy `SKILL.md` into your skills directory:
 
-**Claude Code / Claude:**
 ```bash
 mkdir -p ~/.claude/skills/barber
 curl -o ~/.claude/skills/barber/SKILL.md https://raw.githubusercontent.com/maxkilla/barber/main/SKILL.md
@@ -39,7 +38,7 @@ Both paths work identically — barber detects the runtime (Claude vs Hermes) an
 
 ## What it does
 
-Runs a 7-part audit, one finding per line, on any SKILL.md (installed, downloaded, or freshly drafted):
+Runs a 7-part audit, one finding per line, on any SKILL.md — installed, downloaded, or freshly drafted:
 
 1. **Description** — undertriggering, missing "use when" phrasing, trigger phrase coverage gaps, collisions with other skills
 2. **Body** — redundant instructions, over-explaining, example-dense sections that should split into `references/`, over-500-line threshold (frontmatter excluded)
@@ -62,6 +61,18 @@ In a Claude conversation with this skill installed:
 
 Findings are shown before any edit; nothing is changed without confirmation, and safety-relevant instructions are never trimmed.
 
+## Proof
+
+Real results from Hermes running barber against actual skills, as reported in the merged PRs:
+
+| Skill audited | Before | After | Cut |
+|---|---|---|---|
+| `last30days` | 1709 lines | 844 lines | 51% ([PR #1](https://github.com/maxkilla/barber/pull/1)) |
+
+PR #2 reports findings from auditing 3 additional skills (example-density and generated-file issues found, no line-count delta reported for those passes).
+
+No automated benchmark suite exists in this repo yet — these numbers are from real dogfooding sessions, not a `bench` script. Treat them as anecdotal until more runs land.
+
 ## When to use / when to skip
 
 **Use it if you…**
@@ -73,6 +84,7 @@ Findings are shown before any edit; nothing is changed without confirmation, and
 **Skip it if you…**
 - have a single small skill that's already lean — barber will just say "clean, no cuts"
 - want automated CI-based regression testing — barber is a manual audit pass run by Claude in-conversation, not a test framework or eval harness
+- need hard guarantees on token savings — the estimates are a rough per-line heuristic (~3.3 tok/line), not a tokenizer-verified count
 
 ## License
 
