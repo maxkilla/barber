@@ -1,5 +1,7 @@
 # barber
 
+<img src="assets/logo.png" alt="barber logo" width="500">
+
 **Audits and repackages Claude Skills and Hermes skills — trims bloat, fixes weak triggers, catches cross-skill duplication, estimates token cost, detects generated files.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
