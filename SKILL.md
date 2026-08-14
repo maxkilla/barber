@@ -51,6 +51,7 @@ Per Bennett 2023 ("weakest hypothesis, not shortest"): a good trigger descriptio
 - This is a description-only pass — don't touch body length or content here, that's section 1/2.
 
 **7. Cross-skill dedup and composability (needs the other installed skills' bodies, not just descriptions)**
+- Pre-filter before reading bodies: pull the distinctive terms from each skill's description + `##` headers (skip generic words — "skill", "use", "when"). Two skills sharing near-zero vocabulary can't have body overlap or a real co-load dependency; skip that pair without opening either body. Only read full bodies for pairs that share enough vocabulary to plausibly overlap. This keeps a library-wide dedup pass from reading every body against every other body — cost scales with plausible-overlap pairs, not with N².
 - Body overlap: two skills both give full instructions for the same sub-task (not just trigger overlap — actual redundant procedure). Flag the pair and propose one owns it, the other references it ("see <skill> for X").
 - Missing co-load links: skill A's workflow depends on or commonly runs alongside skill B (e.g. a design-to-code skill that needs a framework-specific skill), but neither description says so. Flag as a silent-failure risk — Claude won't know to load both.
 - False co-load: description says "use alongside X" but X's own scope never actually needs it, or X was renamed/removed. Flag as stale.
@@ -78,7 +79,7 @@ Per Bennett 2023 ("weakest hypothesis, not shortest"): a good trigger descriptio
 
 ## Library-wide tune-up
 
-When asked to audit everything: list installed skills, audit each description only (cheap pass), report the top 3 worst offenders with estimated always-on token cost, and ask which to deep-audit. Include a description-level dedup/co-load scan (section 7, trigger-overlap only — bodies too expensive at this pass) in the same report. Don't deep-audit an entire library unprompted.
+When asked to audit everything: list installed skills, audit each description only (cheap pass), report the top 3 worst offenders with estimated always-on token cost, and ask which to deep-audit. Include a description-level dedup/co-load scan (section 7's vocabulary pre-filter, applied to descriptions/headers only — bodies too expensive at this pass) in the same report; the pre-filter is what makes even this cheap pass useful, since it surfaces only plausible-overlap pairs instead of every pair. Don't deep-audit an entire library unprompted.
 
 ## Rules
 
