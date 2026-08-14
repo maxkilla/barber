@@ -1,6 +1,6 @@
 ---
 name: barber
-description: Comb, trim, and optimize other skills. Audits any SKILL.md (or .skill package) for bloat, weak trigger descriptions, redundancy, token waste, and structural problems, then produces a leaner repackaged version. Use whenever the user wants to review, audit, clean up, shorten, optimize, or refactor a skill, asks "why isn't my skill triggering", asks which of their skills overlap, or wants their whole skill library tuned up. Works on user skills, downloaded ecosystem skills, and skills just created in this conversation.
+description: "Comb and audits other skills — trims bloat, fixes weak triggers, catches cross-skill duplication, estimates token cost, detects generated files. Use whenever the user asks to: audit, comb, trim, or optimize a skill, asks 'why isn't my skill triggering', asks which skills overlap, or wants their whole skill library tuned up. Works on installed skills, downloaded ecosystem skills, and skills just created in this conversation."
 ---
 
 # Barber
@@ -75,7 +75,7 @@ Per Bennett 2023 ("weakest hypothesis, not shortest"): a good trigger descriptio
 2. Preserve the original `name` exactly; the output file is `<name>.skill`, not `<name>-v2`.
 3. Show the user a findings list (one line each: location → cut → replacement) BEFORE editing. Include generalization findings (section 6) as location → narrow/broad → fix, and dedup/composability findings (section 7) as skill A ↔ skill B → issue → fix. Let them veto.
 4. Edit, then report the before/after line count and estimated token savings.
-5. Package: `cd /tmp && zip -r /mnt/user-data/outputs/<name>.skill <name>/`, then present the file.
+5. Package: `cd /tmp && zip -r <name>.skill <name>/`, then present the file.
 
 ## Library-wide tune-up
 
