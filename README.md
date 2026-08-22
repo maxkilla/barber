@@ -1,6 +1,9 @@
 # barber
 
-<img src="assets/logo.png" alt="barber logo" width="400">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.png">
+  <img src="assets/logo.png" alt="barber logo" width="400">
+</picture>
 
 **Audits and repackages Claude/Hermes skills — trims bloat, fixes weak triggers, catches duplication, fills real gaps, all with your approval.**
 
