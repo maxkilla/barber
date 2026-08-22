@@ -75,7 +75,12 @@ Per Bennett 2023 ("weakest hypothesis, not shortest"): a good trigger descriptio
 2. Preserve the original `name` exactly; the output file is `<name>.skill`, not `<name>-v2`.
 3. Show the user a findings list (one line each: location → cut → replacement) BEFORE editing. Include generalization findings (section 6) as location → narrow/broad → fix, and dedup/composability findings (section 7) as skill A ↔ skill B → issue → fix. Let them veto.
 4. Edit, then report the before/after line count and estimated token savings.
-5. Package: `cd /tmp && zip -r <name>.skill <name>/`, then present the file.
+5. Verify before packaging — don't trust the diff looks right, confirm it:
+   - Frontmatter still parses as valid YAML (`name` and `description` keys intact).
+   - Description still covers every trigger phrase section 6 flagged as real (not just the ones that got cut).
+   - No orphaned references: if the edit removed a section, heading, or example, grep the rest of the body for anything that still points to it (a `references/*.md` pointer, a "see section N" cross-reference, a numbered-example callout). A cut you made is the most common source of a new dangling reference — check your own diff, not just what was already broken.
+   - If any check fails, fix it before packaging — don't package a known-broken file and mention it as a caveat.
+6. Package: `cd /tmp && zip -r <name>.skill <name>/`, then present the file.
 
 ## Library-wide tune-up
 
