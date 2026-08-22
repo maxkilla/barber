@@ -95,12 +95,16 @@ Everything above finds what to cut. This finds what's dangerously missing — th
 
 Iterate-fix-retest on a single skill, with a human checkpoint every cycle — never a fully autonomous loop. Barber's core rule still applies: it proposes, it never silently applies a behavior change.
 
-1. Run a full audit including `--gaps` (sections 1–8).
-2. Show all findings — cuts and gap findings both, in their normal formats. Get explicit approval per finding, same as the repair workflow. Nothing proceeds unapproved.
-3. Apply only what was approved, to /tmp/<name>/.
-4. If `evals/evals.json` exists in the skill directory, run it. If it doesn't exist, skip straight to step 6 — never fabricate a pass/fail result for a skill with no eval suite.
-5. If evals fail, or the approved edit surfaced a new gap or cut candidate, go back to step 1 on the updated file. Cap at 3 cycles total, counted from the first pass — on reaching the cap, stop and report the unresolved findings as-is rather than looping further.
-6. Report every cycle's approved changes together as one combined diff summary (not just the last cycle) — a person approving cycle 1 needs to see it listed even if cycle 3 touched the same section again. Then run the normal verify-before-package step and package.
+Explore and Formal are separate passes, modeled on AI4AI-Bench's benchmark design (arXiv:2608.20318): only the diff crosses from one to the other, never the reasoning that produced it. Verification never trusts "this should work because I explained why" — it re-checks the actual edited file fresh, the same way a held-out evaluator would.
+
+1. **Explore.** Run a full audit including `--gaps` (sections 1–8) against the current file.
+2. Show all findings — cuts and gap findings both, in their normal formats. Get explicit approval per finding. Nothing proceeds unapproved.
+3. Apply only what was approved, to /tmp/<name>/. This diff is the checkpoint for this cycle — nothing else about the Explore pass carries forward into verification.
+4. **Formal.** Re-read the edited file fresh — don't reuse Explore's stated reasoning about why the edit is correct, check the actual result. If `evals/evals.json` exists in the skill directory, run it against this checkpoint and label the result **verified**. If it doesn't exist, label the checkpoint **unverified** and say so explicitly in the report — never let "no eval suite" read the same as "passed."
+5. If evals fail, or the fresh Formal read surfaces a new gap or cut candidate, go back to step 1 on the updated file. Cap at 3 cycles (3 checkpoints) total, counted from the first pass — on reaching the cap, stop and report the unresolved findings as-is rather than looping further.
+6. Report every cycle's approved changes together as one combined diff summary (not just the last cycle), each checkpoint tagged verified or unverified — a person approving cycle 1 needs to see it listed even if cycle 3 touched the same section again. Then run the normal verify-before-package step and package.
+
+`--enhance --replay <path-to-patch>`: re-run only the Formal pass (step 4) against a previously-approved patch, without repeating Explore. Use this to re-verify after a manual tweak, or to confirm a checkpoint still holds after the skill's own `evals/evals.json` changed.
 
 This mode is expensive (up to 3 full audits) and behavior-changing by nature (gap findings add content). Never run it as part of a library-wide tune-up or without the user naming the specific skill.
 
