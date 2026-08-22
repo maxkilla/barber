@@ -76,6 +76,7 @@ Everything above finds what to cut. This finds what's dangerously missing — th
 - `--max-lines N`: auto-skip skills whose body prose is ≤ N lines without reading further. Skips the deep audit, reports "under threshold, clean, no cuts" immediately.
 - `--tokens`: include estimated token cost and projected savings in every report.
 - `--gaps`: run section 8's gap-filling pass alongside the normal audit. Findings are "missing: X" — never auto-added, always shown for approval before anything is written.
+- `--enhance`: bounded iterate-fix-retest loop (max 3 cycles) on one named skill — see "Enhance workflow" below. Never runs as part of a library-wide pass.
 
 ## Repair workflow
 
@@ -89,6 +90,19 @@ Everything above finds what to cut. This finds what's dangerously missing — th
    - No orphaned references: if the edit removed a section, heading, or example, grep the rest of the body for anything that still points to it (a `references/*.md` pointer, a "see section N" cross-reference, a numbered-example callout). A cut you made is the most common source of a new dangling reference — check your own diff, not just what was already broken.
    - If any check fails, fix it before packaging — don't package a known-broken file and mention it as a caveat.
 6. Package: `cd /tmp && zip -r <name>.skill <name>/`, then present the file.
+
+## Enhance workflow (`--enhance`, opt-in, bounded to 3 cycles)
+
+Iterate-fix-retest on a single skill, with a human checkpoint every cycle — never a fully autonomous loop. Barber's core rule still applies: it proposes, it never silently applies a behavior change.
+
+1. Run a full audit including `--gaps` (sections 1–8).
+2. Show all findings — cuts and gap findings both, in their normal formats. Get explicit approval per finding, same as the repair workflow. Nothing proceeds unapproved.
+3. Apply only what was approved, to /tmp/<name>/.
+4. If `evals/evals.json` exists in the skill directory, run it. If it doesn't exist, skip straight to step 6 — never fabricate a pass/fail result for a skill with no eval suite.
+5. If evals fail, or the approved edit surfaced a new gap or cut candidate, go back to step 1 on the updated file. Cap at 3 cycles total, counted from the first pass — on reaching the cap, stop and report the unresolved findings as-is rather than looping further.
+6. Report every cycle's approved changes together as one combined diff summary (not just the last cycle) — a person approving cycle 1 needs to see it listed even if cycle 3 touched the same section again. Then run the normal verify-before-package step and package.
+
+This mode is expensive (up to 3 full audits) and behavior-changing by nature (gap findings add content). Never run it as part of a library-wide tune-up or without the user naming the specific skill.
 
 ## Library-wide tune-up
 
