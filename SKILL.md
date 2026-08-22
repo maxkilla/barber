@@ -57,6 +57,13 @@ Per Bennett 2023 ("weakest hypothesis, not shortest"): a good trigger descriptio
 - False co-load: description says "use alongside X" but X's own scope never actually needs it, or X was renamed/removed. Flag as stale.
 - Skip this section if only one skill is in scope — dedup needs a second skill to compare against.
 
+**8. Gap-filling pass (opt-in only — run with `--gaps`, not part of the default audit)**
+Everything above finds what to cut. This finds what's dangerously missing — the opposite failure mode. Findings are phrased as "missing: X, because Y", never "add: X" — barber flags the hole and why it's a real risk, it doesn't write the fix without confirmation. Still bound by the same rule as everything else: propose, don't apply, unless the user approves.
+- Destructive or high-risk action (delete, overwrite, send, pay, deploy) with no confirmation-before-acting language anywhere in the body. Section 5 checks that safety text isn't trimmed; this checks whether it exists in the first place.
+- Trigger conditions genuinely ambiguous (could plausibly mean two different tasks) with zero examples anywhere in the body to disambiguate. Opposite of section 2's example-density check — too few, not too many.
+- A multi-step workflow with no stated stopping condition or success check — the skill could loop or declare victory on a wrong result with nothing to catch it.
+- This pass needs a full body read and is expensive; that's why it's opt-in, not run automatically even during a full audit.
+
 ## Thresholds and modes
 
 **Default audit line count:** 500 lines of body prose (YAML frontmatter excluded). A skill under the threshold with no structural/dependency/safety findings = "clean, no cuts." If `--max-lines N` is passed, substitute N for the default threshold — skills at or below N are skipped automatically without a deep read, the first rung that holds.
@@ -68,12 +75,13 @@ Per Bennett 2023 ("weakest hypothesis, not shortest"): a good trigger descriptio
 - `--check-only`: reports findings only — no /tmp copy, no edits, no file writes. One line per finding. For quick "should I invest in trimming this?" decisions.
 - `--max-lines N`: auto-skip skills whose body prose is ≤ N lines without reading further. Skips the deep audit, reports "under threshold, clean, no cuts" immediately.
 - `--tokens`: include estimated token cost and projected savings in every report.
+- `--gaps`: run section 8's gap-filling pass alongside the normal audit. Findings are "missing: X" — never auto-added, always shown for approval before anything is written.
 
 ## Repair workflow
 
 1. Installed skills are read-only — copy to /tmp/<name>/ first, edit there.
 2. Preserve the original `name` exactly; the output file is `<name>.skill`, not `<name>-v2`.
-3. Show the user a findings list (one line each: location → cut → replacement) BEFORE editing. Include generalization findings (section 6) as location → narrow/broad → fix, and dedup/composability findings (section 7) as skill A ↔ skill B → issue → fix. Let them veto.
+3. Show the user a findings list (one line each: location → cut → replacement) BEFORE editing. Include generalization findings (section 6) as location → narrow/broad → fix, dedup/composability findings (section 7) as skill A ↔ skill B → issue → fix, and gap findings (section 8, if `--gaps` was passed) as missing: X → why it's a risk → proposed addition. Let them veto every finding, including gaps — a proposed addition is not a cut and needs its own explicit yes.
 4. Edit, then report the before/after line count and estimated token savings.
 5. Verify before packaging — don't trust the diff looks right, confirm it:
    - Frontmatter still parses as valid YAML (`name` and `description` keys intact).
