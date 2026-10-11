@@ -1,0 +1,61 @@
+{
+  "fixture-conflict.md": {
+    "planted": [
+      {
+        "id": "length-vs-full-description",
+        "all_of": [
+          [
+            "80 char",
+            "single line",
+            "one line"
+          ],
+          [
+            "description in full",
+            "full pr description",
+            "in full"
+          ]
+        ]
+      },
+      {
+        "id": "second-person",
+        "all_of": [
+          [
+            "'you'",
+            "\"you\"",
+            "\u201cyou\u201d"
+          ],
+          [
+            "second person",
+            "third person"
+          ]
+        ]
+      },
+      {
+        "id": "output-format",
+        "all_of": [
+          [
+            "markdown"
+          ],
+          [
+            "plain text"
+          ]
+        ]
+      },
+      {
+        "id": "confirm-vs-publish",
+        "all_of": [
+          [
+            "confirm"
+          ],
+          [
+            "immediately",
+            "do not wait"
+          ]
+        ]
+      }
+    ]
+  },
+  "fixture-clean.md": {
+    "planted": []
+  }
+}

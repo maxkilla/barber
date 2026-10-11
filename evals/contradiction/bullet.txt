@@ -1,0 +1,1 @@
+- Contradictions: two instructions that cannot both be followed (an "always X" beside a "never X", two different defaults for the same case, a limit that another rule breaks). Quote both with line numbers and propose which one wins. Rules scoped to different conditions ("for small changes… / for larger changes…") are not contradictions.
