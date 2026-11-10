@@ -128,6 +128,11 @@ This mode is expensive (up to 3 full audits) and behavior-changing by nature (ga
 
 When asked to audit everything: list installed skills, audit each description only (cheap pass), report the top 3 worst offenders with estimated always-on token cost, and ask which to deep-audit. Pair confusable skills and give each worst offender a neighbor-contrast description (section 1) with its `Not for:` clause. Include a description-level dedup/co-load scan (section 7's vocabulary pre-filter, applied to descriptions/headers only — bodies too expensive at this pass) in the same report; the pre-filter is what makes even this cheap pass useful, since it surfaces only plausible-overlap pairs instead of every pair. Don't deep-audit an entire library unprompted.
 
+Count installed skills first. Past ~100, open the report with one warning of three parts:
+- Cost: irrelevant descriptions suppress loading of the right skills (100 added skills cut loaded-skill recall ~20 points; 1,000 cut it from 74% to 27%).
+- Fix: disable unused skills; at scale, preselect skills before execution.
+- Caveat: task success hides this — strong agents work around missing skills — so a working library can still be losing loads.
+
 ## Rules
 
 - Findings are one line each. The audit of bloat is not itself bloated.
