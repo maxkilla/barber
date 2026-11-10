@@ -15,6 +15,8 @@ Skills are always-on context tax: every skill's name + description sits in the w
 - Trigger phrase coverage: extract phrases from the description, cross-check against body "When to use" / "Use when" sections. Flag gaps — description promises coverage the body doesn't deliver.
 - Overlaps another installed skill's triggers? Flag the collision and propose which one owns which phrases.
 - Any "when to use" info buried in the body? Move it to the description — the body isn't read until after the trigger decision.
+- Neighbor contrast (needs the nearest skill from section 7): propose a description that leads with what this skill does that its neighbor doesn't, every claim backed by the body. Append `Not for: <work>, <work>.` naming nearby work not covered, up to 3 neighbors. Too long → drop exclusion phrases from the end first, never cut capability text.
+- Overclaim: description advertises work the body doesn't support. Underclaim: body covers work the description omits. Flag both; fix the description, not the body.
 
 **2. Body (the comb ladder, applied to instructions)**
 - Does each section need to exist? Instructions restating what Claude already does by default = delete.
@@ -52,6 +54,8 @@ Per Bennett 2023 ("weakest hypothesis, not shortest"): a good trigger descriptio
 
 **7. Cross-skill dedup and composability (needs the other installed skills' bodies, not just descriptions)**
 - Pre-filter before reading bodies: pull the distinctive terms from each skill's description + `##` headers (skip generic words — "skill", "use", "when"). Two skills sharing near-zero vocabulary can't have body overlap or a real co-load dependency; skip that pair without opening either body. Only read full bodies for pairs that share enough vocabulary to plausibly overlap. This keeps a library-wide dedup pass from reading every body against every other body — cost scales with plausible-overlap pairs, not with N².
+- Nearest neighbor: per audited skill, pick the most similar installed skill by name + description (same vocabulary pre-filter). Feeds section 1's neighbor-contrast line. No neighbor sharing real vocabulary = say so, skip.
+- Name collision: name contains the first word of another skill's name (`paper-writing` / `paper-review`)? Flag, propose a qualifier: topic, workflow, or type of guidance.
 - Body overlap: two skills both give full instructions for the same sub-task (not just trigger overlap — actual redundant procedure). Flag the pair and propose one owns it, the other references it ("see <skill> for X").
 - Missing co-load links: skill A's workflow depends on or commonly runs alongside skill B (e.g. a design-to-code skill that needs a framework-specific skill), but neither description says so. Flag as a silent-failure risk — Claude won't know to load both.
 - False co-load: description says "use alongside X" but X's own scope never actually needs it, or X was renamed/removed. Flag as stale.
@@ -110,7 +114,7 @@ This mode is expensive (up to 3 full audits) and behavior-changing by nature (ga
 
 ## Library-wide tune-up
 
-When asked to audit everything: list installed skills, audit each description only (cheap pass), report the top 3 worst offenders with estimated always-on token cost, and ask which to deep-audit. Include a description-level dedup/co-load scan (section 7's vocabulary pre-filter, applied to descriptions/headers only — bodies too expensive at this pass) in the same report; the pre-filter is what makes even this cheap pass useful, since it surfaces only plausible-overlap pairs instead of every pair. Don't deep-audit an entire library unprompted.
+When asked to audit everything: list installed skills, audit each description only (cheap pass), report the top 3 worst offenders with estimated always-on token cost, and ask which to deep-audit. Pair confusable skills and give each worst offender a neighbor-contrast description (section 1) with its `Not for:` clause. Include a description-level dedup/co-load scan (section 7's vocabulary pre-filter, applied to descriptions/headers only — bodies too expensive at this pass) in the same report; the pre-filter is what makes even this cheap pass useful, since it surfaces only plausible-overlap pairs instead of every pair. Don't deep-audit an entire library unprompted.
 
 ## Rules
 
