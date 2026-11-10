@@ -86,9 +86,11 @@ Everything above finds what to cut. This finds what's dangerously missing — th
 
 **Token estimation:** barber estimates always-on context cost at ~3.3 tokens per line of SKILL.md body prose. Reports before/after line count and token savings even for "clean, no cuts" verdicts, so users can rank which skills to deep-audit first.
 
+**Static scores:** run `python3 scripts/skill_scores.py <SKILL.md>` (in barber's own directory; stdlib only) and report its numbers, not freehand estimates. Conciseness: lines, empty_ratio, repeated_ratio, unique_density. Consistency (description vs body): keyword_cov, bigram_cov, tfidf_cos, title_cov. Scores rank skills; a low consistency score points at section 1 over/underclaim, a low conciseness score at section 2. Script unavailable = say so and label any estimate as freehand.
+
 **Modes:**
 - Full audit (default): reads the entire SKILL.md + references/ + scripts/ + assets/, reports every finding, proposes edits to /tmp/<name>/.
-- `--check-only`: reports findings only — no /tmp copy, no edits, no file writes. One line per finding. For quick "should I invest in trimming this?" decisions.
+- `--check-only`: reports findings only — no /tmp copy, no edits, no file writes. One line per finding, led by the static-scores line. For quick "should I invest in trimming this?" decisions.
 - `--max-lines N`: auto-skip skills whose body prose is ≤ N lines without reading further. Skips the deep audit, reports "under threshold, clean, no cuts" immediately.
 - `--tokens`: include estimated token cost and projected savings in every report.
 - `--gaps`: run section 8's gap-filling pass alongside the normal audit. Findings are "missing: X" — never auto-added, always shown for approval before anything is written.
@@ -99,7 +101,7 @@ Everything above finds what to cut. This finds what's dangerously missing — th
 1. Installed skills are read-only — copy to /tmp/<name>/ first, edit there.
 2. Preserve the original `name` exactly; the output file is `<name>.skill`, not `<name>-v2`.
 3. Show the user a findings list (one line each: location → cut → replacement) BEFORE editing. Include generalization findings (section 6) as location → narrow/broad → fix, dedup/composability findings (section 7) as skill A ↔ skill B → issue → fix, and gap findings (section 8, if `--gaps` was passed) as missing: X → why it's a risk → proposed addition. Let them veto every finding, including gaps — a proposed addition is not a cut and needs its own explicit yes.
-4. Edit, then report the before/after line count and estimated token savings.
+4. Edit, then report the before/after line count and estimated token savings. Re-run the static scores on the edited copy and report before/after.
 5. Verify before packaging — don't trust the diff looks right, confirm it:
    - Frontmatter still parses as valid YAML (`name` and `description` keys intact).
    - Description still covers every trigger phrase section 6 flagged as real (not just the ones that got cut).

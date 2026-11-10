@@ -20,6 +20,8 @@ Barber is a Claude Skill, not an application. There's no build, no runtime, no d
 barber/
 ├── SKILL.md          # the actual skill — read this before changing behavior
 ├── README.md         # human-facing install/usage doc, kept in sync with SKILL.md
+├── scripts/          # skill_scores.py — stdlib-only static scores that SKILL.md tells barber to run
+├── evals/            # fixtures + A/B harnesses (headless `claude -p`) and unit tests for scripts/
 ├── LICENSE           # MIT
 ├── assets/
 │   ├── logo.png      # light-theme logo (black on transparent)
@@ -27,15 +29,15 @@ barber/
 └── .gitignore
 ```
 
-Don't create new top-level directories (`scripts/`, `references/`, etc.) unless `SKILL.md`'s own content genuinely needs them — most changes here are edits to `SKILL.md` itself.
+Don't create other top-level directories (`references/`, etc.) unless `SKILL.md`'s own content genuinely needs them — most changes here are edits to `SKILL.md` itself.
 
 ## Setup & build
 
-None. Clone and edit `SKILL.md` directly.
+None. Clone and edit `SKILL.md` directly. `scripts/` is Python stdlib only; no install step.
 
 ## Testing
 
-<!-- TODO: no automated test suite or evals/evals.json exists for this repo. SKILL.md itself documents a `--enhance` mode that checks for evals/evals.json on the *skill being audited* — that's a feature barber offers to other skills, not something this repo has for itself yet. Manual verification only: read the diff, confirm YAML frontmatter still parses, confirm the change doesn't silently alter what barber does (see Boundaries below). -->
+<!-- TODO: no automated test suite or evals/evals.json exists for this repo. SKILL.md itself documents a `--enhance` mode that checks for evals/evals.json on the *skill being audited* — that's a feature barber offers to other skills, not something this repo has for itself yet. Run `python3 -m unittest discover evals/static-scores` for scripts/, and each `evals/*/run.py` (needs the `claude` CLI) for prompt changes. Otherwise manual verification: read the diff, confirm YAML frontmatter still parses, confirm the change doesn't silently alter what barber does (see Boundaries below). -->
 
 ## Code style & conventions
 
