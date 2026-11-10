@@ -84,7 +84,7 @@ Everything above finds what to cut. This finds what's dangerously missing — th
 
 **Default audit line count:** 500 lines of body prose (YAML frontmatter excluded). A skill under the threshold with no structural/dependency/safety findings = "clean, no cuts." If `--max-lines N` is passed, substitute N for the default threshold — skills at or below N are skipped automatically without a deep read, the first rung that holds.
 
-**Token estimation:** barber estimates always-on context cost at ~3.3 tokens per line of SKILL.md body prose. Reports before/after line count and token savings even for "clean, no cuts" verdicts, so users can rank which skills to deep-audit first.
+**Token estimation:** barber estimates always-on context cost at ~3.3 tokens per line of SKILL.md body prose. Reports before/after line count and token savings even for "clean, no cuts" verdicts, so users can rank which skills to deep-audit first. Savings are secondary to trigger quality: skill text is mostly cached, so shorter does not mean cheaper. Lead every report with description/trigger findings; put token numbers last.
 
 **Static scores:** run `python3 scripts/skill_scores.py <SKILL.md>` (in barber's own directory; stdlib only) and report its numbers, not freehand estimates. Conciseness: lines, empty_ratio, repeated_ratio, unique_density. Consistency (description vs body): keyword_cov, bigram_cov, tfidf_cos, title_cov. Scores rank skills; a low consistency score points at section 1 over/underclaim, a low conciseness score at section 2. Script unavailable = say so and label any estimate as freehand.
 
@@ -99,11 +99,14 @@ Everything above finds what to cut. This finds what's dangerously missing — th
 ## Repair workflow
 
 1. Installed skills are read-only — copy to /tmp/<name>/ first, edit there.
+   - Cut by deleting, not rewording: body trims remove whole sentences, list items, or sections; every remaining line stays byte-identical. LLM rewrites of body text cut success (5 to 13 points on a small model); deletion held it.
+   - Reword only the description (sections 1 and 6). A body rewrite goes in a separate list titled `Behavior-changing proposals` and needs its own explicit yes.
 2. Preserve the original `name` exactly; the output file is `<name>.skill`, not `<name>-v2`.
-3. Show the user a findings list (one line each: location → cut → replacement) BEFORE editing. Include generalization findings (section 6) as location → narrow/broad → fix, dedup/composability findings (section 7) as skill A ↔ skill B → issue → fix, and gap findings (section 8, if `--gaps` was passed) as missing: X → why it's a risk → proposed addition. Let them veto every finding, including gaps — a proposed addition is not a cut and needs its own explicit yes.
+3. Show the user a findings list (one line each: location → cut → replacement) BEFORE editing. Body findings are deletions only: location → delete (whole sentence, list item, or section). Include generalization findings (section 6) as location → narrow/broad → fix, dedup/composability findings (section 7) as skill A ↔ skill B → issue → fix, and gap findings (section 8, if `--gaps` was passed) as missing: X → why it's a risk → proposed addition. Let them veto every finding, including gaps — a proposed addition is not a cut and needs its own explicit yes.
 4. Edit, then report the before/after line count and estimated token savings. Re-run the static scores on the edited copy and report before/after.
 5. Verify before packaging — don't trust the diff looks right, confirm it:
    - Frontmatter still parses as valid YAML (`name` and `description` keys intact).
+   - Body diff is deletion-only: `diff /tmp/orig/SKILL.md /tmp/<name>/SKILL.md | grep '^>'` shows description lines at most. Any other `>` line = a reword; revert it or move it to `Behavior-changing proposals`.
    - Description still covers every trigger phrase section 6 flagged as real (not just the ones that got cut).
    - No orphaned references: if the edit removed a section, heading, or example, grep the rest of the body for anything that still points to it (a `references/*.md` pointer, a "see section N" cross-reference, a numbered-example callout). A cut you made is the most common source of a new dangling reference — check your own diff, not just what was already broken.
    - If any check fails, fix it before packaging — don't package a known-broken file and mention it as a caveat.
@@ -138,5 +141,6 @@ Count installed skills first. Past ~100, open the report with one warning of thr
 ## Rules
 
 - Findings are one line each. The audit of bloat is not itself bloated.
+- Trims delete; they don't reword.
 - Never change what a skill does, only how efficiently it says it — behavior changes get proposed separately and clearly labeled.
 - If a skill is already lean, say "clean, no cuts" and stop. Manufactured findings are worse than none.
